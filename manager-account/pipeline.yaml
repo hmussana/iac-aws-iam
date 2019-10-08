@@ -1,0 +1,151 @@
+---
+
+AWSTemplateFormatVersion: '2010-09-09'
+
+
+Description: Pipeline for IAM users and Groups creation in the manager account.
+
+
+Parameters:
+  GithubOauthToken:
+    Description: The personal access token of the GitHub source repo.
+    NoEcho: true
+    Type: String
+
+
+Resources:
+  PipelineBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: BucketOwnerFullControl
+      VersioningConfiguration:
+        Status: Enabled
+
+  CloudFormationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          Action: sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service: cloudformation.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/AdministratorAccess
+
+  PipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          Action: sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service: codepipeline.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/AdministratorAccess
+      Path: /
+
+  IamPipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      ArtifactStore:
+        Location:
+          Ref: PipelineBucket
+        Type: S3
+      Name: iam-pipeline
+      RoleArn:
+        Fn::GetAtt:
+        - PipelineRole
+        - Arn
+      Stages:
+      - Name: Source-Stage
+        Actions:
+        - Name: Source-Action
+          ActionTypeId:
+            Category: Source
+            Owner: ThirdParty
+            Provider: GitHub
+            Version: 1
+          Configuration:
+            Branch: master
+            OAuthToken:
+              Ref: GithubOauthToken
+            Repo: iac-aws-iam   # Source repo where you store the templates
+            Owner: p4I24n01d    # User name for the owner of above repo
+          InputArtifacts: []
+          OutputArtifacts:
+          - Name: SourceOutput
+
+      - Name: Pipeline-Stage
+        Actions:
+        - Name: Pipeline-Action
+          ActionTypeId:
+            Category: Deploy
+            Owner: AWS
+            Provider: CloudFormation
+            Version: 1
+          Configuration:
+            ActionMode: CREATE_UPDATE
+            Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM
+            ParameterOverrides:
+              Fn::Sub: |
+                {
+                  "GithubOauthToken": "${GithubOauthToken}"
+                }
+            RoleArn:
+              Fn::GetAtt:
+              - CloudFormationRole
+              - Arn
+            StackName:
+              Ref: AWS::StackName
+            TemplatePath: SourceOutput::manager-account/pipeline.yaml
+          InputArtifacts:
+          - Name: SourceOutput
+          RunOrder: 1
+
+      - Name: Group-Stage
+        Actions:
+        - Name: Create-Admin-Groups
+          ActionTypeId:
+            Category: Deploy
+            Owner: AWS
+            Provider: CloudFormation
+            Version: 1
+          Configuration:
+            ActionMode: CREATE_UPDATE
+            Capabilities: CAPABILITY_NAMED_IAM
+            RoleArn:
+              Fn::GetAtt:
+              - CloudFormationRole
+              - Arn
+            StackName: groups-admin
+            TemplatePath: SourceOutput::manager-account/groups-admin.yaml
+          InputArtifacts:
+          - Name: SourceOutput
+          RunOrder: 1
+
+      - Name: User-Stage
+        Actions:
+        - Name: Create-IAM-Users
+          ActionTypeId:
+            Category: Deploy
+            Owner: AWS
+            Provider: CloudFormation
+            Version: 1
+          Configuration:
+            ActionMode: CREATE_UPDATE
+            Capabilities: CAPABILITY_NAMED_IAM
+            RoleArn:
+              Fn::GetAtt:
+              - CloudFormationRole
+              - Arn
+            StackName: users
+            TemplatePath: SourceOutput::manager-account/users.yaml
+          InputArtifacts:
+          - Name: SourceOutput
+          RunOrder: 1
+
+...

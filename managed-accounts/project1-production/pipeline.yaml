@@ -1,0 +1,130 @@
+---
+
+AWSTemplateFormatVersion: '2010-09-09'
+
+
+Description: Pipeline for setting up IAM roles in the managed account project1-production.
+
+
+Parameters:
+  GithubOauthToken:
+    Description: Access token of the GitHub account for setting up source repo.   # See https://docs.aws.amazon.com/codepipeline/latest/userguide/integrations-action-type.html#integrations-source
+    NoEcho: true
+    Type: String
+
+
+Resources:
+  PipelineBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: BucketOwnerFullControl
+      VersioningConfiguration:
+        Status: Enabled
+
+  CloudFormationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          Action: sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service: cloudformation.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/AdministratorAccess
+
+  PipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          Action: sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service: codepipeline.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/AdministratorAccess
+      Path: /
+
+  IamPipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      ArtifactStore:
+        Location:
+          Ref: PipelineBucket
+        Type: S3
+      Name: iam-pipeline
+      RoleArn:
+        Fn::GetAtt:
+        - PipelineRole
+        - Arn
+      Stages:
+      - Name: Source-Stage
+        Actions:
+        - Name: Source-Action
+          ActionTypeId:
+            Category: Source
+            Owner: ThirdParty
+            Provider: GitHub
+            Version: 1
+          Configuration:
+            Branch: master
+            OAuthToken:
+              Ref: GithubOauthToken
+            Repo: iac-aws-iam   # Source repo where you store the templates
+            Owner: p4I24n01d    # User name for the owner of above repo
+          InputArtifacts: []
+          OutputArtifacts:
+          - Name: SourceOutput
+
+      - Name: Pipeline-Stage
+        Actions:
+        - Name: Pipeline-Action
+          ActionTypeId:
+            Category: Deploy
+            Owner: AWS
+            Provider: CloudFormation
+            Version: 1
+          Configuration:
+            ActionMode: CREATE_UPDATE
+            Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM
+            ParameterOverrides:
+              Fn::Sub: |
+                {
+                  "GithubOauthToken": "${GithubOauthToken}"
+                }
+            RoleArn:
+              Fn::GetAtt:
+              - CloudFormationRole
+              - Arn
+            StackName:
+              Ref: AWS::StackName
+            TemplatePath: SourceOutput::iam/managed-accounts/project1-production/pipeline.yaml
+          InputArtifacts:
+          - Name: SourceOutput
+          RunOrder: 1
+
+      - Name: Role-Stage
+        Actions:
+        - Name: IAM-Role
+          ActionTypeId:
+            Category: Deploy
+            Owner: AWS
+            Provider: CloudFormation
+            Version: 1
+          Configuration:
+            ActionMode: CREATE_UPDATE
+            Capabilities: CAPABILITY_NAMED_IAM
+            RoleArn:
+              Fn::GetAtt:
+              - CloudFormationRole
+              - Arn
+            StackName: roles
+            TemplatePath: SourceOutput::iam/managed-accounts/project1-production/roles.yaml
+          InputArtifacts:
+          - Name: SourceOutput
+          RunOrder: 1
+
+...

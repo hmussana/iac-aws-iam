@@ -1,0 +1,136 @@
+---
+
+AWSTemplateFormatVersion: '2010-09-09'
+
+
+Description: Example IAM groups for administrator access of various managed accounts. 
+
+
+Mappings:
+  AccountIDs:
+    proj1-production:
+      AccountId: '123456789012'   #Example account IDs for managed accounts
+    proj1-staging:
+      AccountId: '234567890123'
+
+
+Outputs:
+  proj1Full:
+    Description: project1 full (production & staging administrator)
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-proj1Full
+    Value:
+      Ref: proj1Full
+
+  proj1Prod:
+    Description: project1 production administrator
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-proj1Production
+    Value:
+      Ref: proj1Prod
+
+  proj1Stag:
+    Description: project1 staging administrator
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-proj1Staging
+    Value:
+      Ref: proj1Stag
+
+  superAdmin:      
+    Description: project1 full (production & staging administrator)
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-superAdmin
+    Value:
+      Ref: superAdmin
+
+
+Resources:
+  proj1Prod:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: admin-proj1Production
+      Policies:
+      - PolicyName: AdministratorRole
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Action:
+            - sts:AssumeRole
+            Effect: Allow
+            Resource:
+              Fn::Sub:
+              - arn:aws:iam::${AccountId}:role/AdministratorRole
+              - AccountId:
+                  Fn::FindInMap:
+                  - AccountIDs
+                  - proj1-production
+                  - AccountId
+
+  proj1Stag:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: admin-proj1Staging
+      Policies:
+      - PolicyName: AdministratorRole
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Action:
+            - sts:AssumeRole
+            Effect: Allow
+            Resource:
+              Fn::Sub:
+              - arn:aws:iam::${AccountId}:role/AdministratorRole
+              - AccountId:
+                  Fn::FindInMap:
+                  - AccountIDs
+                  - proj1-staging
+                  - AccountId
+
+  proj1Full:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: admin-proj1Full
+      Policies:
+      - PolicyName: AdministratorRole
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Action:
+            - sts:AssumeRole
+            Effect: Allow
+            Resource:
+            - Fn::Sub:
+              - arn:aws:iam::${AccountId}:role/AdministratorRole
+              - AccountId:
+                  Fn::FindInMap:
+                  - AccountIDs
+                  - proj1-production
+                  - AccountId
+            - Fn::Sub:
+              - arn:aws:iam::${AccountId}:role/AdministratorRole
+              - AccountId:
+                  Fn::FindInMap:
+                  - AccountIDs
+                  - proj1-staging
+                  - AccountId
+
+  superAdmin:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: superAdmin-all
+      Policies:
+      - PolicyName: AdministratorRole
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Action:
+            - sts:AssumeRole
+            Effect: Allow
+            Resource: arn:aws:iam::*:role/AdministratorRole   # Can assume roles with any account IDs
+
+...

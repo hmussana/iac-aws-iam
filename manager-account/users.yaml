@@ -1,0 +1,35 @@
+---
+
+AWSTemplateFormatVersion: "2010-09-09"
+
+
+Description: Example IAM users and their group memberships for managed accounts.
+
+
+Resources:
+  User1FirstnameLastname:  #  Logical name for resource to locate the users quickly. Example: UserBarackObama
+    Type: AWS::IAM::User
+    Properties:
+      UserName: firstname_lastname    # Example username like: barack_obama
+      Groups:
+      - Fn::ImportValue: groups-admin-proj1Full   #IAM groups imported from Outputs section of iam-groups-* stack
+      - Fn::ImportValue: groups-admin-proj2Staging
+      LoginProfile:
+        Password: ExamplePassword    #  Gets outdated after first login because of PasswordResetRequired: true
+        PasswordResetRequired: true
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/IAMUserChangePassword
+
+  User2FirstnameLastname:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: firstname_lastname
+      Groups:
+      - Fn::ImportValue: groups-admin-superAdmin
+      LoginProfile:
+        Password: ExamplePassword
+        PasswordResetRequired: true
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/IAMUserChangePassword
+
+...

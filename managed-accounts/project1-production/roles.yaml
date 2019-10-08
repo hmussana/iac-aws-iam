@@ -1,0 +1,52 @@
+---
+
+AWSTemplateFormatVersion: '2010-09-09'
+
+
+Description: Example IAM roles per account having manager account principal listed as a trusted entity.
+
+
+Resources:
+  AdministratorRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: AdministratorRole   # Unique per account
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Action: sts:AssumeRole
+          Effect: Allow
+          Principal:
+            AWS: arn:aws:iam::012345678901:root   # Example account ID for the manager account, thus same in all roles
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/AdministratorAccess
+
+  PowerUserRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: PowerUserRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Action: sts:AssumeRole
+          Effect: Allow
+          Principal:
+            AWS: arn:aws:iam::012345678901:root
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/PowerUserAccess
+
+  ReadOnlyUserRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: ReadOnlyUserRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Action: sts:AssumeRole
+          Effect: Allow
+          Principal:
+            AWS: arn:aws:iam::012345678901:root
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/ReadOnlyAccess
+
+...

@@ -18,7 +18,6 @@ It contains cloudformation templates for setting up: **IAM Users**, **IAM Groups
 ### Terminology
 **manager-account:** Main AWS account which only has IAM Groups and Users and acts as a jump account
 **managed-accounts:** Team/Project & environment wise AWS accounts e.g. development-staging or androidApp-production
-**sa**
 
 ### Directory Structure
 ```
@@ -58,12 +57,13 @@ Once the pipelines finish, the users should be able to login using their one-tim
 
 
 ## Planned Improvements
+* Replace example passwords with parameters for each user.
 * Add a script to fill out the placeholders and vars in the templates using a local config file.
 * Create a single cross-account pipeline in the manager account to also setup roles stacks in a list of AWS accounts.
 
 
 ## Author
-**p4I24n01d** https://github.com/p4I24n01d
+[p4I24n01d](https://github.com/p4I24n01d)
 
 ## References
 Here are some documentation links which can be used as references:

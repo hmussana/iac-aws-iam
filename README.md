@@ -16,9 +16,9 @@ It contains cloudformation templates for setting up: **IAM Users**, **IAM Groups
 ## Usage
 
 ### Terminology
-**manager-account:** Main AWS account which only has IAM Groups and Users and acts as a jump account.
-**managed-accounts:** Team/Project & environment wise AWS accounts e.g. development-staging or androidApp-production.
-**jump account:** Another name for manager account.
+* **manager-account:** Main AWS account which only has IAM Groups and Users and acts as a jump account.
+* **managed-accounts:** Team/Project & environment wise AWS accounts e.g. development-staging or androidApp-production.
+* **jump account:** Another name for manager account.
 
 ### Login Workflow
 User Login: ` Login to manager account -> Assume role to a managed account based upon group membership`

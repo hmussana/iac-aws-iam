@@ -14,7 +14,7 @@ Resources:
       Groups:
       - Fn::ImportValue: groups-admin-proj1Full   #IAM groups imported from Outputs section of iam-groups-* stack
       - Fn::ImportValue: groups-admin-proj2Staging
-      LoginProfile:
+      LoginProfile:   # LoginProfile is optional so can be skipped
         Password: ExamplePassword    #  Gets outdated after first login because of PasswordResetRequired: true
         PasswordResetRequired: true
       ManagedPolicyArns:

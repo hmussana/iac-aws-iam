@@ -60,12 +60,6 @@ Following two types of pipelines will be setup using only the already defined re
 Once the pipelines finish, the users should be able to login using their one-time passwords and can then assume roles into various AWS accounts as defined by the IAM groups they are members of.
 
 
-## Planned Improvements
-* Replace example passwords with parameters for each user.
-* Add a script to fill out the placeholders and vars in the templates using a local config file.
-* Create a single cross-account pipeline in the manager account to also setup roles stacks in a list of AWS accounts.
-
-
 ## Author
 [p4I24n01d](https://github.com/p4I24n01d)
 

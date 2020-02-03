@@ -1,7 +1,7 @@
 # iac-aws-iam
 
 ## Introduction
-IaC AWS IAM is a set of example AWS CloudFormation templates for quickly setting up infrastructure pipelines for cross-account IAM access using AWS CodePipeline and GitHub as the pipeline trigger/source. Using this setup, IAM users(human users intended) only have to be created once in the jump account(manager account) and then can assume roles to other AWS accounts owned by the same owner(think AWS Organizations).
+IaC AWS IAM is a set of example AWS CloudFormation templates for quickly setting up infrastructure pipelines for **Cross-Account Access** using **AWS CodePipeline** and GitHub repo as the pipeline trigger/source. Using this setup, IAM users(human users intended) only have to be created once in the jump account(manager account) and then can assume roles to other AWS accounts owned by the same owner(think AWS Organizations).
 It contains cloudformation templates for setting up: **IAM Users**, **IAM Groups** and **IAM Roles** for those who: 
 * have multiple AWS accounts with one base account with all human users and want to setup continuous deployment for them.
 * want to setup multiple AWS accounts from scratch and looking to implement cloudformation templates for AWS IAM users, roles and groups.

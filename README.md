@@ -2,12 +2,12 @@
 
 ## Introduction
 IaC AWS IAM is a set of example AWS CloudFormation templates for quickly setting up infrastructure pipelines for **Cross-Account Access** using **AWS CodePipeline** and GitHub repo as the pipeline trigger/source. Using this setup, IAM users(human users intended) only have to be created once in the jump account(manager account) and then can assume roles to other AWS accounts owned by the same owner(think AWS Organizations).
-It contains cloudformation templates for setting up: **IAM Users**, **IAM Groups** and **IAM Roles** for those who: 
-* have multiple AWS accounts with one base account with all human users and want to setup continuous deployment for them.
+This repository contains cloudformation templates for setting up: **IAM Users**, **IAM Groups** and **IAM Roles** for those who:
+* have multiple AWS accounts and want to manage & roll out all human users automatically (Continuous deployment).
 * want to setup multiple AWS accounts from scratch and looking to implement cloudformation templates for AWS IAM users, roles and groups.
 
 
-## Technologies
+## Services
 * **AWS IAM:** Identity and Access Management service for accessing AWS services
 * **AWS CloudFormation:** Infrastructure as Code Service for creating AWS resources. Yaml as the templates language
 * **AWS CodePipeline:**	Continuous Delivery Service by AWS, used here to automatically deploy any changes pushed to the source git repository.
@@ -46,9 +46,9 @@ Following two types of pipelines will be setup using only the already defined re
 
 ### Deployment Steps
 1. Rename `project1-production` as desired and add all the aws accounts as directories under: `managed-accounts`
-	- Also adjust the `TemplatePath` values accordingly in *pipeline.yaml* so the code pipeline. 
+	- Also adjust the `TemplatePath` values accordingly in *pipeline.yaml*.
 2. Replace the example AWS account ID `012345678901` in `project1-production` and subsequently for all managed accounts you want to use.
-3. Create the pipeline stack in AWS CloudFormation console or via api/cli using `managed-accounts/project1-production/pipeline.yaml` which will setup the roles stack itself. See [this](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-console-create-stack.html) to do that.
+3. Create the pipeline stack in AWS CloudFormation console or via api/cli using `managed-accounts/project1-production/pipeline.yaml` which will setup the roles stack itself. See [this](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-console-create-stack.html) for how to do that.
 4. Provide your GitHub token for the parameter value. Check [this guide](https://docs.aws.amazon.com/codepipeline/latest/userguide/integrations-action-type.html#integrations-source
 ) for details on how to generate one.
 5. Update/add the example account ID mappings in `groups-admin.yaml`. Create more group templates if desired using this file and name appropriately e.g. `groups-developer.yaml` or `groups-readonly.yaml`. Also change project names as desired and adjust `GroupName` and Output Export values accordingly.
@@ -66,8 +66,6 @@ Once the pipelines finish, the users should be able to login using their one-tim
 ## References
 Here are some documentation links which can be used as references:
 
-    https://aws.amazon.com/blogs/devops/aws-building-a-secure-cross-account-continuous-delivery-pipeline/
-    https://docs.aws.amazon.com/codepipeline/latest/userguide/pipelines-webhooks.html
     https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-codepipeline-pipeline.html
     https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/best-practices.html
     https://docs.aws.amazon.com/codepipeline/latest/userguidereference-pipeline-structure.html#pipeline-requirements

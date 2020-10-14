@@ -74,7 +74,7 @@ Resources:
             OAuthToken:
               Ref: GithubOauthToken
             Repo: iac-aws-iam   # Source repo where you store the templates
-            Owner: p4I24n01d    # User name for the owner of above repo
+            Owner: hmussana    # User name for the owner of above repo
           InputArtifacts: []
           OutputArtifacts:
           - Name: SourceOutput
